@@ -3,6 +3,6 @@ Written by John Hippisley, 9/13/20
 
 ## Usage
 <pre>
-./bf <source file> [-D]
+./bf &lt;source file>&gt; [-D]
 -D	Debug
 </pre>
