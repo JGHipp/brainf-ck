@@ -4,6 +4,12 @@
 #include <string>
 #include <cstring>
 
+template <typename T>
+T clamp(const T& n, const T& lower, const T& upper)
+{
+  return std::max(lower, std::min(n, upper));
+}
+
 bool isExecutable(char character)
 {
 	const char* executable = "<>-+,.[]";
@@ -23,7 +29,6 @@ void execute(std::string program, bool debug)
 	std::vector<int> loopStack;
 	int cycles = 0, ip = 0;
 	// Execute program
-	std::cout << "Executing..." << std::endl;
 	while(ip >= 0 && ip < (int) program.length())
 	{
 		if(isExecutable(program.at(ip)))
@@ -54,10 +59,17 @@ void execute(std::string program, bool debug)
 					else loopStack.pop_back();
 					break;
 			}
+			if((dp - mp) < 0 || (dp - mp) >= MEMORY_SIZE)
+			{
+				std::cout << std::endl << "DP (" << (dp - mp) << ") out of bounds. IP = " << ip << std::endl;
+				int begin = clamp<int>(ip - 20, 0, MEMORY_SIZE - 1);
+				std::cout << program.substr(begin, 40) << std::endl << std::string(20, ' ') << "^" << std::endl;
+				break;
+			}
 			cycles++;
 			if(debug)
 			{
-				for(int i = 0; i < 10; i++)
+				for(int i = 0; i < 20; i++)
 				{
 					int num = (int) mp[i];
 					int temp = num, digits = 0;
@@ -73,11 +85,12 @@ void execute(std::string program, bool debug)
 				std::cout << std::endl;
 				for(int i = 0; i < (dp - mp); i++) std::cout << "     ";
 				std::cout << "  ^" << std::endl;
-				getchar();
 			}
 		}
 		ip++;
 	}
+	if(ip < 0)
+		std::cout << std::endl << "IP (" << ip << ") out of bounds (lengh = " << program.length() << ")" << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -88,7 +101,6 @@ int main(int argc, char** argv)
 		return -1;
 	}
 	bool debug = (argc == 3 && (strcmp(argv[2], "-d") == 0 || strcmp(argv[2], "-D") == 0));
-	std::cout << "Loading Brainf*ck source from '" << argv[1] << "'..." << std::endl;
 	std::ifstream inputFile(argv[1]);
 	if(inputFile.fail())
 	{
@@ -100,5 +112,4 @@ int main(int argc, char** argv)
 	while(inputFile.get(temp)) program.push_back(temp);
 	if(debug) std::cout << "Utilizing Debug mode." << std::endl;
 	execute(std::string(program.begin(), program.end()), debug);
-	std::cout << "Program terminated." << std::endl;
 }
